@@ -9,7 +9,7 @@ A full-featured online course platform built with **ASP.NET Core** and **Entity 
 - **Course catalogue**  browse, search, and sort courses by title, rating, or price
 - **Lesson management**  create, edit, reorder, and delete lessons within a course
 - **User authentication**  registration, login, email confirmation, password reset, and 2FA via authenticator app or recovery codes
-- **Enrolment & payments**  Stripe integration for paid course subscriptions
+- **Enrolment & payments**  Stripe and PayPal integration for paid course subscriptions
 - **Course ratings**  authenticated users can rate courses they are enrolled in
 - **Author tools**  course authors can manage their own content; a contact form lets students send questions directly to the author
 - **Role-based authorisation**  `Teacher` and `Administrator` roles with custom policy handlers
@@ -24,19 +24,20 @@ A full-featured online course platform built with **ASP.NET Core** and **Entity 
 
 | Layer | Technology |
 |---|---|
-| Framework | ASP.NET Core MVC + Razor Pages (.NET 6+) |
+| Framework | ASP.NET Core MVC + Razor Pages (.NET 6) |
 | ORM | Entity Framework Core (SQLite) |
-| Raw SQL layer | ADO.NET (`SqliteAccessor`) |
+| Raw SQL layer | ADO.NET (`SqliteDatabaseAccessor`) |
 | Identity | ASP.NET Core Identity with custom `ApplicationUser` |
 | Authentication | Cookie + external providers (configurable) |
-| Payments | Stripe .NET SDK |
+| Payments | Stripe .NET SDK, PayPal Checkout SDK |
 | Image processing | Magick.NET |
 | Email | MailKit / SMTP |
 | Caching | `IMemoryCache` with decorator pattern |
 | CAPTCHA | AspNetCore.ReCaptcha |
+| HTML sanitisation | HtmlSanitizer |
 | Rich text editor | Summernote |
 | QR codes (2FA) | qrcode.js |
-| Frontend | Bootstrap 5, jQuery, Cropper.js |
+| Frontend | Bootstrap 4.4.1, jQuery, Font Awesome |
 
 ---
 
