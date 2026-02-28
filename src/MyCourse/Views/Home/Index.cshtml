@@ -1,0 +1,24 @@
+@model HomeViewModel
+<div class="jumbotron">
+    <h1 class="display-4">@ViewData["Title"]</h1>
+    <p class="lead">Learn in an easy and fun way with our online courses!<br>
+        Choose from a wide catalog available at any time.</p>
+    <p><a asp-controller="Courses" asp-action="Index" class="btn btn-primary">Browse course catalog <i class="fas fa-angle-right"></i></a></p>
+</div>
+
+<section>
+    <h2>Recently added</h2>
+    @foreach (CourseViewModel course in Model.MostRecentCourses)
+            {
+        <partial name="Courses/_CourseLine" model="@course"></partial>
+            }
+</section>
+
+
+<section>
+    <h2>Top rated</h2>
+    @foreach (CourseViewModel course in Model.BestRatingCourses)
+            {
+        <partial name="Courses/_CourseLine" model="@course"></partial>
+            }
+</section>

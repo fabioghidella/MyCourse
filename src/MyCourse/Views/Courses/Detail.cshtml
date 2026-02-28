@@ -1,0 +1,121 @@
+@model CourseDetailViewModel
+@inject IAuthorizationService authService
+@{
+    AuthorizationResult courseAuthorResult = await authService.AuthorizeAsync(User, nameof(Policy.CourseAuthor));
+    bool canEdit = courseAuthorResult.Succeeded;
+
+    AuthorizationResult courseSubscriberResult = await authService.AuthorizeAsync(User, nameof(Policy.CourseSubscriber));
+    bool isSubscribed = courseSubscriberResult.Succeeded;
+}
+<section class="course-info">
+    <div class="row">
+        <div class="col-md-9">
+            <h1>@Model.Title
+                @if (canEdit)
+                {
+                <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fas fa-pencil-alt"></i> Edit</a>
+                }
+            </h1>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            @if (isSubscribed)
+            {
+            <span class="alert alert-secondary btn-block">You are enrolled in this course</span>
+            }
+            else if (canEdit)
+            {
+            <span class="alert alert-secondary btn-block">You are the course author</span>
+            }
+            else
+            {
+            <a class="btn btn-warning btn-lg btn-block subscribe-course" asp-action="Pay" asp-route-id="@Model.Id">Enroll</a>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9" html-sanitize>
+            @Model.Description
+        </div>
+        <div class="col-md-3">
+            <aside>
+                <author>di @Model.Author</author>
+                <div class="rating" title="@Model.Rating">
+                    <rating value="@Model.Rating"></rating>
+                </div>
+                <div class="price">
+                    <price current-price="@Model.CurrentPrice" full-price="@Model.FullPrice"></price>
+                </div>
+                <img src="@Model.ImagePath" class="img-fluid course-image" alt="@Model.Title" asp-append-version="true">
+                <a asp-page="/Contact" asp-route-id="@Model.Id" class="btn btn-block btn-outline-secondary mt-3">Ask a question</a>
+                @if (isSubscribed)
+                {
+                <a asp-action="Vote" asp-route-id="@Model.Id" class="btn btn-block btn-outline-secondary mt-2" data-toggle="modal" data-target="#voteModal">Rate this course</a>
+                }
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="course-lessons">
+	<h2>Lessons (@Model.Lessons.Count)
+        @if (canEdit)
+        {
+            <a class="btn btn-outline-primary btn-sm" asp-controller="Lessons" asp-action="Create" asp-route-id="@Model.Id"><i class="fas fa-plus"></i> Add new</a>
+        }
+    </h2>
+	@foreach (var lesson in Model.Lessons)
+	{
+	<hr>
+	<div class="row">
+		<div class="col-md-9 d-flex align-items-center">
+            @if (isSubscribed || canEdit)
+            {
+		    <a asp-controller="Lessons" asp-action="Detail" asp-route-id="@lesson.Id">@lesson.Title</a>
+            }
+            else
+            {
+            <span>@lesson.Title</span>
+            }
+		</div>
+		<div class="col-md-3 d-flex align-items-center justify-content-end lesson-duration">
+			<i class="far fa-clock"></i><time>@lesson.Duration.ToString("m'm 's's'")</time>
+            @if (canEdit)
+            {
+            <a class="btn btn-outline-primary btn-sm ml-3" asp-controller="Lessons" asp-action="Edit" asp-route-id="@lesson.Id"><i class="fas fa-pencil-alt"></i></a>
+            }
+		</div>
+	</div>
+	}
+    <hr>
+    <div class="row course-duration">
+		<div class="col-md-9 d-flex align-items-center">
+            Total
+        </div>
+        <div class="col-md-3 d-flex align-items-center justify-content-end">
+            <i class="far fa-clock"></i><time>@Model.TotalCourseDuration.ToString("h'h 'm'm 's's'")</time>
+        </div>
+    </div>
+</section>
+<div class="modal fade" id="voteModal" tabindex="-1" aria-labelledby="voteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="voteModalLabel">Your rating</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <iframe width="100%" height="100" frameBorder="0"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+@section Scripts
+{
+<script>
+  $('#voteModal').on('shown.bs.modal', function(event) {
+      $(this).find('iframe').attr('src', event.relatedTarget.href);
+  });
+</script>
+}

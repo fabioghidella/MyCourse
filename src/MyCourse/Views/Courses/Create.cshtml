@@ -1,0 +1,26 @@
+@model CourseCreateInputModel
+<h1>@ViewData["Title"]</h1>
+<form method="post">
+    <div class="row">
+        <div class="col-12">
+            <!--
+            This view demonstrates the use of both asp-validation-summary and asp-validation-for.
+            Validation errors will therefore be shown twice.
+            -->
+            <div asp-validation-summary="All"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 mb-3">
+            <input type="text" asp-for="Title" class="form-control form-control-lg" placeholder="Type a title that attracts students...">
+            <span asp-validation-for="Title"></span>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fa-rocket"></i> Create course!</button>
+        </div>
+    </div>
+</form>
+@section Scripts
+{
+    <partial name="_Validation"></partial>
+}

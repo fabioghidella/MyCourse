@@ -1,0 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MyCourse.Models.ViewModels.Courses;
+using MyCourse.Models.ViewModels.Home;
+
+namespace MyCourse.Controllers;
+
+public class HomeController : Controller
+{
+
+    [AllowAnonymous]
+    public async Task<IActionResult> Index([FromServices] ICachedCourseService courseService)
+    {
+        ViewData["Title"] = "Welcome to MyCourse!";
+        List<CourseViewModel> bestRatingCourses = await courseService.GetBestRatingCoursesAsync();
+        List<CourseViewModel> mostRecentCourses = await courseService.GetMostRecentCoursesAsync();
+
+        HomeViewModel viewModel = new()
+        {
+            BestRatingCourses = bestRatingCourses,
+            MostRecentCourses = mostRecentCourses
+        };
+
+        return View(viewModel);
+    }
+}

@@ -1,0 +1,102 @@
+using Microsoft.EntityFrameworkCore;
+using MyCourse.Models.Exceptions.Application;
+using MyCourse.Models.InputModels.Lessons;
+using MyCourse.Models.Services.Infrastructure;
+using MyCourse.Models.ViewModels.Lessons;
+
+namespace MyCourse.Models.Services.Application.Lessons;
+
+public class EfCoreLessonService : ILessonService
+{
+    private readonly ILogger<EfCoreLessonService> logger;
+    private readonly MyCourseDbContext dbContext;
+
+    public EfCoreLessonService(ILogger<EfCoreLessonService> logger, MyCourseDbContext dbContext)
+    {
+        this.logger = logger;
+        this.dbContext = dbContext;
+    }
+
+    public async Task<LessonDetailViewModel> GetLessonAsync(int id)
+    {
+        IQueryable<LessonDetailViewModel> queryLinq = dbContext.Lessons
+            .AsNoTracking()
+            .Where(lesson => lesson.Id == id)
+            .Select(lesson => LessonDetailViewModel.FromEntity(lesson)); //Using static methods like FromEntity can lead to inefficient queries. Consider keeping the mapping in the lambda or using a custom extension method.
+
+        LessonDetailViewModel viewModel = await queryLinq.FirstOrDefaultAsync();
+
+        if (viewModel == null)
+        {
+            logger.LogWarning("Lesson {id} not found", id);
+            throw new LessonNotFoundException(id);
+        }
+
+        return viewModel;
+    }
+
+    public async Task<LessonEditInputModel> GetLessonForEditingAsync(int id)
+    {
+        IQueryable<LessonEditInputModel> queryLinq = dbContext.Lessons
+            .AsNoTracking()
+            .Where(lesson => lesson.Id == id)
+            .Select(lesson => LessonEditInputModel.FromEntity(lesson)); //Using static methods like FromEntity can lead to inefficient queries. Consider keeping the mapping in the lambda or using a custom extension method.
+
+        LessonEditInputModel inputModel = await queryLinq.FirstOrDefaultAsync();
+
+        if (inputModel == null)
+        {
+            logger.LogWarning("Lesson {id} not found", id);
+            throw new LessonNotFoundException(id);
+        }
+
+        return inputModel;
+    }
+
+    public async Task<LessonDetailViewModel> CreateLessonAsync(LessonCreateInputModel inputModel)
+    {
+        Lesson lesson = new(inputModel.Title, inputModel.CourseId);
+        dbContext.Add(lesson);
+        await dbContext.SaveChangesAsync();
+
+        return LessonDetailViewModel.FromEntity(lesson);
+    }
+
+    public async Task<LessonDetailViewModel> EditLessonAsync(LessonEditInputModel inputModel)
+    {
+        Lesson lesson = await dbContext.Lessons.FindAsync(inputModel.Id);
+
+        if (lesson == null)
+        {
+            throw new LessonNotFoundException(inputModel.Id);
+        }
+
+        lesson.ChangeTitle(inputModel.Title);
+        lesson.ChangeDescription(inputModel.Description);
+        lesson.ChangeDuration(inputModel.Duration);
+        lesson.ChangeOrder(inputModel.Order);
+        dbContext.Entry(lesson).Property(lesson => lesson.RowVersion).OriginalValue = inputModel.RowVersion;
+
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new OptimisticConcurrencyException();
+        }
+
+        return LessonDetailViewModel.FromEntity(lesson);
+    }
+
+    public async Task DeleteLessonAsync(LessonDeleteInputModel inputModel)
+    {
+        Lesson lesson = await dbContext.Lessons.FindAsync(inputModel.Id);
+        if (lesson == null)
+        {
+            throw new LessonNotFoundException(inputModel.Id);
+        }
+        dbContext.Remove(lesson);
+        await dbContext.SaveChangesAsync();
+    }
+}
