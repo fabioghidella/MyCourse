@@ -64,6 +64,59 @@ src/MyCourse/
 
 ---
 
+## Getting Started
+
+### Prerequisites
+
+- [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
+- [ImageMagick](https://imagemagick.org/script/download.php) (required for image processing)
+
+### Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/fabioghidella/MyCourse.git
+   cd MyCourse
+   ```
+
+2. **Restore frontend libraries**
+   ```bash
+   dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+   cd src/MyCourse
+   libman restore
+   ```
+
+3. **Configure user secrets**
+
+   The following secrets must be set via `dotnet user-secrets` (do not put them in `appsettings.json`):
+   ```bash
+   cd src/MyCourse
+   dotnet user-secrets set "Smtp:Username" "<your-smtp-username>"
+   dotnet user-secrets set "Smtp:Password" "<your-smtp-password>"
+   dotnet user-secrets set "ReCaptcha:SiteKey" "<your-recaptcha-site-key>"
+   dotnet user-secrets set "ReCaptcha:SecretKey" "<your-recaptcha-secret-key>"
+   dotnet user-secrets set "Stripe:PrivateKey" "<your-stripe-private-key>"
+   dotnet user-secrets set "Paypal:ClientId" "<your-paypal-client-id>"
+   dotnet user-secrets set "Paypal:ClientSecret" "<your-paypal-client-secret>"
+   ```
+
+4. **Apply database migrations**
+   ```bash
+   dotnet ef database update
+   ```
+
+5. **Run the application**
+   ```bash
+   dotnet run
+   ```
+   The app will be available at `https://localhost:5001`.
+
+### Admin account
+
+The first user to register with the email address configured in `Users:AssignAdministratorRoleOnRegistration` (`appsettings.json`) will automatically be granted the `Administrator` role.
+
+---
+
 ## Credits
 
 This project was originally developed as part of a structured course on ASP.NET Core.
